@@ -3,7 +3,6 @@ use std::str::Chars;
 
 #[derive(PartialEq, Debug)]
 enum Token {
-    EOF,
     Def,
     Extern,
     Identifier(String),
@@ -23,8 +22,14 @@ impl<'a> Iterator for TokenIter<'a> {
     }
 }
 
-fn get_token(mut chars: &mut Peekable<Chars>) -> Option<Token> {
-    remove_whitespace(&mut chars);
+fn get_token(chars: &mut Peekable<Chars>) -> Option<Token> {
+    while let Some(&item) = chars.peek() {
+        if item.is_whitespace() {
+            chars.next();
+        } else {
+            break;
+        }
+    }
 
     match chars.next() {
         None => None,
@@ -72,15 +77,6 @@ fn get_token(mut chars: &mut Peekable<Chars>) -> Option<Token> {
     }
 }
 
-fn remove_whitespace(chars: &mut Peekable<Chars>) {
-    while let Some(&item) = chars.peek() {
-        if item.is_whitespace() {
-            chars.next();
-        } else {
-            break;
-        }
-    }
-}
 
 #[cfg(test)]
 mod tests {
@@ -155,7 +151,7 @@ mod tests {
 
     #[test]
     fn test_token_iter() {
-        let mut chars = "def( hello".chars().peekable();
+        let chars = "def( hello".chars().peekable();
         let mut token_iter = TokenIter { chars };
 
         assert_eq!(token_iter.next(), Some(Token::Def));
