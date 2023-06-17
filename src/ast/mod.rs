@@ -1,13 +1,15 @@
-use std::iter::Peekable;
 use crate::lexer::{Token, TokenIter};
+use std::iter::Peekable;
 use thiserror::Error;
-use crate::ast::Expression::Variable;
+use crate::ast::binary::parse_binary_operation;
 
-enum Expression {
+pub mod binary;
+
+pub enum Expression {
     Number(f64),
     Variable(String),
     Binary(Box<BinaryExpr>),
-    Call(Box<CallExpr>)
+    Call(Box<CallExpr>),
 }
 
 struct BinaryExpr {
@@ -18,12 +20,12 @@ struct BinaryExpr {
 
 struct CallExpr {
     callee: String,
-    args: Vec<Expression>
+    args: Vec<Expression>,
 }
 
 struct ProtoType {
     name: String,
-    args: Vec<Expression>
+    args: Vec<Expression>,
 }
 
 struct Function {
@@ -34,7 +36,7 @@ struct Function {
 #[derive(Error, Debug)]
 #[error("parse error: {:?}", msg)]
 pub struct ParseError {
-    msg: String
+    msg: String,
 }
 
 fn parse_number(number: f64) -> Expression {
@@ -42,33 +44,34 @@ fn parse_number(number: f64) -> Expression {
 }
 
 /// Converts '(expression)'
-fn parse_parenthesis_expression(tokens: &mut Peekable<TokenIter>) -> Result<Expression, ParseError> {
-    tokens.next();  // destroy open bracket
+fn parse_parenthesis_expression(
+    tokens: &mut Peekable<TokenIter>,
+) -> Result<Expression, ParseError> {
+    tokens.next(); // destroy open bracket
 
     let inner_expression = parse_expression(tokens)?;
 
     match tokens.next() {
         Some(Token::Operator(')')) => (),
         _ => {
-            return Err(ParseError { msg: "Expected ')'".to_string() })
+            return Err(ParseError {
+                msg: "Expected ')'".to_string(),
+            })
         }
     };
 
     Ok(inner_expression)
 }
 
-
-fn parse_expression(tokens: &mut Peekable<TokenIter>) -> Result<Expression, ParseError> {
-    todo!()
-}
-
 /// Converts text starting with identifier such as 'data' or 'get_data(a, b)'.
 fn parse_identifier(tokens: &mut Peekable<TokenIter>) -> Result<Expression, ParseError> {
     let variable = match tokens.next() {
-        Some(Token::Identifier(identifier)) => {
-            identifier
-        },
-        _ => return Err(ParseError{ msg: "Expected Identifier Token".to_string() })
+        Some(Token::Identifier(identifier)) => identifier,
+        _ => {
+            return Err(ParseError {
+                msg: "Expected Identifier Token".to_string(),
+            })
+        }
     };
 
     match tokens.peek() {
@@ -82,46 +85,40 @@ fn parse_identifier(tokens: &mut Peekable<TokenIter>) -> Result<Expression, Pars
                 match tokens.next() {
                     Some(Token::Operator(')')) => {
                         break;
-                    },
-                    Some(Token::Operator(',')) => {
-                        ()
-                    },
+                    }
+                    Some(Token::Operator(',')) => (),
                     _ => {
-                        return Err(
-                            ParseError { msg: "Expected  ',' or ')'".to_string() }
-                        )
+                        return Err(ParseError {
+                            msg: "Expected  ',' or ')'".to_string(),
+                        })
                     }
                 }
             }
 
-            Ok(Expression::Call(
-                Box::new(
-                    CallExpr {
-                        callee: variable,
-                        args,
-                    }
-                )
-            ))
-        },
-        _ => Ok(Expression::Variable(variable))
+            Ok(Expression::Call(Box::new(CallExpr {
+                callee: variable,
+                args,
+            })))
+        }
+        _ => Ok(Expression::Variable(variable)),
     }
 }
 
+/// A primary expression is one which is just a single identifier, something enclosed in brackets, or a number.
 fn parse_primary(tokens: &mut Peekable<TokenIter>) -> Result<Expression, ParseError> {
     match tokens.peek() {
-        Some(&Token::Identifier(_)) => {
-            parse_identifier(tokens)
-        },
-        Some(&Token::Number(number)) => {
-            Ok(parse_number(number))
-        },
-        Some(&Token::Operator('(')) => {
-            parse_parenthesis_expression(tokens)
-        },
-        _ => {
-            Err(ParseError { msg: "Unknown token when expecting an expression".to_string()})
-        }
+        Some(&Token::Identifier(_)) => parse_identifier(tokens),
+        Some(&Token::Number(number)) => Ok(parse_number(number)),
+        Some(&Token::Operator('(')) => parse_parenthesis_expression(tokens),
+        _ => Err(ParseError {
+            msg: "Unknown token when expecting an expression".to_string(),
+        }),
     }
 }
 
+/// This is the main work behind expressions, such as 'a + (b * get_mean(x))'.
+fn parse_expression(tokens: &mut Peekable<TokenIter>) -> Result<Expression, ParseError> {
+    let initial_expression = parse_expression(tokens)?;
 
+    parse_binary_operation(tokens, initial_expression, 0)
+}

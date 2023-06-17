@@ -81,7 +81,6 @@ fn get_token(chars: &mut Peekable<Chars>) -> Option<Token> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -160,7 +159,10 @@ mod tests {
 
         assert_eq!(token_iter.next(), Some(Token::Def));
         assert_eq!(token_iter.next(), Some(Token::Operator('(')));
-        assert_eq!(token_iter.next(), Some(Token::Identifier("hello".to_string())));
+        assert_eq!(
+            token_iter.next(),
+            Some(Token::Identifier("hello".to_string()))
+        );
         assert_eq!(token_iter.next(), None);
     }
 }
