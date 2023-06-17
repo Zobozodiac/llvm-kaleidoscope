@@ -10,6 +10,7 @@ pub enum Token {
     Operator(char),
 }
 
+#[derive(Debug)]
 pub struct TokenIter<'a> {
     chars: Peekable<Chars<'a>>,
 }
@@ -70,6 +71,8 @@ fn get_token(chars: &mut Peekable<Chars>) -> Option<Token> {
                 if item.is_digit(10) | (item == '.') {
                     num_str.push(item);
                     chars.next();
+                } else {
+                    break
                 }
             }
 
@@ -119,7 +122,7 @@ mod tests {
     #[test]
     fn test_get_token_num() {
         assert_eq!(
-            get_token(&mut "4.0".chars().peekable()),
+            get_token(&mut "4.0\n".chars().peekable()),
             Some(Token::Number(4.0))
         );
     }
