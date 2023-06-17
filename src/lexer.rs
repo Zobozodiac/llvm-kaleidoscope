@@ -2,7 +2,7 @@ use std::iter::Peekable;
 use std::str::Chars;
 
 #[derive(PartialEq, Debug)]
-enum Token {
+pub enum Token {
     Def,
     Extern,
     Identifier(String),
@@ -10,7 +10,7 @@ enum Token {
     Operator(char),
 }
 
-struct TokenIter<'a> {
+pub struct TokenIter<'a> {
     chars: Peekable<Chars<'a>>,
 }
 
@@ -22,7 +22,7 @@ impl<'a> Iterator for TokenIter<'a> {
     }
 }
 
-fn get_token(chars: &mut Peekable<Chars>) -> Option<Token> {
+fn remove_whitespace(chars: &mut Peekable<Chars>) {
     while let Some(&item) = chars.peek() {
         if item.is_whitespace() {
             chars.next();
@@ -30,6 +30,10 @@ fn get_token(chars: &mut Peekable<Chars>) -> Option<Token> {
             break;
         }
     }
+}
+
+fn get_token(chars: &mut Peekable<Chars>) -> Option<Token> {
+    remove_whitespace(chars);
 
     match chars.next() {
         None => None,
