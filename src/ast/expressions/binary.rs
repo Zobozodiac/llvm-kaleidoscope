@@ -1,7 +1,10 @@
-use crate::ast::{parse_primary, BinaryExpr, Expression, ParseError};
-use crate::lexer::{Token, TokenIter};
 use std::iter::Peekable;
 use std::ops::Index;
+
+use crate::ast::expressions::basic::parse_primary;
+use crate::ast::expressions::{BinaryExpr, Expression};
+use crate::ast::ParseError;
+use crate::lexer::{Token, TokenIter};
 
 /// Binary operators in increasing order of importance
 static BINARY_OPERATORS: [char; 3] = ['-', '+', '*'];
