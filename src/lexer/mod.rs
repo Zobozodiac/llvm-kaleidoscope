@@ -14,6 +14,14 @@ pub struct TokenIter<'a> {
     chars: Peekable<Chars<'a>>,
 }
 
+impl<'a> TokenIter<'a> {
+    pub fn new(content: &'a str) -> Self {
+        TokenIter {
+            chars: content.chars().peekable(),
+        }
+    }
+}
+
 impl<'a> Iterator for TokenIter<'a> {
     type Item = Token;
 

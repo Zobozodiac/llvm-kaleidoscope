@@ -86,3 +86,26 @@ pub fn parse_binary_operation(
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ast::expressions::Expression::Binary;
+
+    #[test]
+    fn test_parse_binary_operation() {
+        let mut tokens = TokenIter::new("+b");
+        let initial_expression = Expression::Variable("a".to_string());
+
+        let expression = parse_binary_operation(&mut tokens.peekable(), initial_expression, 0);
+
+        assert_eq!(
+            expression,
+            Ok(Binary(Box::new(BinaryExpr {
+                op: '+',
+                lhs: Expression::Variable("a".to_string()),
+                rhs: Expression::Variable("b".to_string()),
+            })))
+        )
+    }
+}

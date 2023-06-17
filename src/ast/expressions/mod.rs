@@ -8,6 +8,7 @@ use crate::lexer::{Token, TokenIter};
 pub mod basic;
 pub mod binary;
 
+#[derive(Debug, PartialEq)]
 pub enum Expression {
     Number(f64),
     Variable(String),
@@ -15,12 +16,14 @@ pub enum Expression {
     Call(Box<CallExpr>),
 }
 
+#[derive(Debug, PartialEq)]
 pub struct BinaryExpr {
     op: char,
     lhs: Expression,
     rhs: Expression,
 }
 
+#[derive(Debug, PartialEq)]
 struct CallExpr {
     callee: String,
     args: Vec<Expression>,
