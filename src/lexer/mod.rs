@@ -119,8 +119,8 @@ mod tests {
     #[test]
     fn test_get_token_num() {
         assert_eq!(
-            get_token(&mut "1.23".chars().peekable()),
-            Some(Token::Number(1.23))
+            get_token(&mut "4.0".chars().peekable()),
+            Some(Token::Number(4.0))
         );
     }
 
@@ -171,6 +171,28 @@ mod tests {
             token_iter.next(),
             Some(Token::Identifier("hello".to_string()))
         );
+        assert_eq!(token_iter.next(), None);
+    }
+
+    #[test]
+    fn test_extern() {
+        let mut token_iter = TokenIter::new("extern sin(arg)");
+
+        assert_eq!(token_iter.next(), Some(Token::Extern));
+        assert_eq!(token_iter.next(), Some(Token::Identifier("sin".to_string())));
+        assert_eq!(token_iter.next(), Some(Token::Operator('(')));
+        assert_eq!(token_iter.next(), Some(Token::Identifier("arg".to_string())));
+        assert_eq!(token_iter.next(), Some(Token::Operator(')')));
+        assert_eq!(token_iter.next(), None);
+    }
+
+    #[test]
+    fn test_addition_expression() {
+        let mut token_iter = TokenIter::new("a+b");
+
+        assert_eq!(token_iter.next(), Some(Token::Identifier("a".to_string())));
+        assert_eq!(token_iter.next(), Some(Token::Operator('+')));
+        assert_eq!(token_iter.next(), Some(Token::Identifier("b".to_string())));
         assert_eq!(token_iter.next(), None);
     }
 }

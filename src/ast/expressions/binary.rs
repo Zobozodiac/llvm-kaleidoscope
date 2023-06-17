@@ -2,8 +2,7 @@ use std::iter::Peekable;
 use std::ops::Index;
 
 use crate::ast::expressions::basic::parse_primary;
-use crate::ast::expressions::{BinaryExpr, Expression};
-use crate::ast::ParseError;
+use crate::ast::{BinaryExpr, Expression, ParseError};
 use crate::lexer::{Token, TokenIter};
 
 /// Binary operators in increasing order of importance
@@ -90,7 +89,7 @@ pub fn parse_binary_operation(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ast::expressions::Expression::Binary;
+    use crate::ast::Expression::Binary;
 
     #[test]
     fn test_parse_binary_operation() {

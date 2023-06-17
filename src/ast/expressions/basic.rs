@@ -1,7 +1,6 @@
 use std::iter::Peekable;
 
-use crate::ast::expressions::{CallExpr, Expression};
-use crate::ast::{expressions, ParseError};
+use crate::ast::{CallExpr, Expression, expressions, ParseError};
 use crate::lexer::{Token, TokenIter};
 
 fn parse_number(number: f64) -> Expression {
